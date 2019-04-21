@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void enterDeets(View view) {
-        Intent intent = new Intent(this, ShoppingListActivity.class);
+        Intent intent = new Intent(this, ShoppingItemEntry.class);
         Bundle b = new Bundle();
 
         EditText editName = (EditText) findViewById(R.id.editText);
