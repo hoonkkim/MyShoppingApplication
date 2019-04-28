@@ -25,15 +25,16 @@ public class MainActivity extends AppCompatActivity {
         EditText editName = (EditText) findViewById(R.id.editText);
         EditText editBudget = (EditText) findViewById(R.id.editText2);
 
-        String name = editName.getText().toString();
-        double budget = new Double(editBudget.getText().toString()).doubleValue();
+        if(!editName.getText().toString().isEmpty() && !editBudget.getText().toString().isEmpty()) {
+            String name = editName.getText().toString();
+            double budget = new Double(editBudget.getText().toString()).doubleValue();
 
-        b.putString(USER_NAME, name);
-        b.putDouble(USER_BUDGET, budget);
+            b.putString(USER_NAME, name);
+            b.putDouble(USER_BUDGET, budget);
 
-        intent.putExtras(b);
-
-        startActivity(intent);
+            intent.putExtras(b);
+            startActivity(intent);
+        }
     }
 
 
