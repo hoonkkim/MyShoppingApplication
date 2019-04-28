@@ -1,6 +1,7 @@
 package com.example.myshoppingapp;
 
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
@@ -11,7 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 
-public class ShoppingItemEntry extends AppCompatActivity implements View.OnClickListener{
+public class ShoppingItemEntry<userName> extends AppCompatActivity implements View.OnClickListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +24,9 @@ public class ShoppingItemEntry extends AppCompatActivity implements View.OnClick
         String userName = b.getString(MainActivity.USER_NAME);
         double userBudget = b.getDouble(MainActivity.USER_BUDGET);
         String userBugdetString = Double.toString(userBudget);
+
+        ShoppingUser.setName(userName);
+        ShoppingUser.setBankAccount(userBudget);
 // Welcome User
         TextView nameView = findViewById(R.id.nameView);
         nameView.setText("Welcome " + userName + "!");
@@ -33,6 +37,7 @@ public class ShoppingItemEntry extends AppCompatActivity implements View.OnClick
 
     BubbleSort BubbleSorter = new BubbleSort();
     ArrayList<ShoppingItem> UserShoppingArrayList = new ArrayList<ShoppingItem>();
+    User ShoppingUser = new User();
 
     public void onClick(View v) {
         switch(v.getId())
@@ -42,7 +47,7 @@ public class ShoppingItemEntry extends AppCompatActivity implements View.OnClick
                 EditText priceEntryView = findViewById(R.id.PriceEntry);
                 EditText quantityEntryView = findViewById(R.id.QuantityEntry);
                 EditText priorityEntryView = findViewById(R.id.PriorityEntry);
-
+// Run DupeChecker Here
                 if (!nameEntryView.getText().toString().isEmpty() && (nameEntryView.getText().toString() != "") &&
                         !priceEntryView.getText().toString().isEmpty() &&
                         !quantityEntryView.getText().toString().isEmpty() &&
@@ -57,7 +62,7 @@ public class ShoppingItemEntry extends AppCompatActivity implements View.OnClick
                         UserShoppingArrayList.add(new ShoppingItem(name, price, priority, quantity));
                         int itemNumber = UserShoppingArrayList.size();
                         UserShoppingArrayList.get(itemNumber - 1).setTotalValue();
-
+//Fix into 4 different Views so everything is aligned Nicely 4/28
                         String output = String.format("%-30s", UserShoppingArrayList.get(itemNumber - 1).getName()) +
                                 String.format("%-30s", String.valueOf(UserShoppingArrayList.get(itemNumber - 1).getPrice())) +
                                 String.format("%-30s", String.valueOf(UserShoppingArrayList.get(itemNumber - 1).getQuantity())) +
@@ -75,22 +80,42 @@ public class ShoppingItemEntry extends AppCompatActivity implements View.OnClick
                 break;
 
             case R.id.ClearList:
-                UserShoppingArrayList = null;
+                UserShoppingArrayList.clear();
+                UserShoppingArrayList.trimToSize();
                 TextView ItemListView = findViewById(R.id.ItemListView);
-                ItemListView.clearComposingText();
+                ItemListView.setText("");
+//                String ListSizeDebug = new String();
+//                        ListSizeDebug = Integer.toString(UserShoppingArrayList.size());
+//                ItemListView.append(ListSizeDebug);
 
                 break;
 
             case R.id.goShoppingButton:
                 int listLength = UserShoppingArrayList.size();
-                BubbleSorter.RunSort(listLength, UserShoppingArrayList);
+                if (listLength > 0) {
+                    BubbleSorter.RunSort(listLength, UserShoppingArrayList);
+                    ItemListView = findViewById(R.id.ItemListView);
+                    ItemListView.setText("");
+                    for (int parseOrder = 0; parseOrder < listLength; parseOrder++) {
+                        if (UserShoppingArrayList.get(parseOrder).getTotalValue() <= ShoppingUser.getBankAccount()) {
+                            UserShoppingArrayList.get(parseOrder).bought();
+                            ShoppingUser.setBankAccount(ShoppingUser.getBankAccount() - UserShoppingArrayList.get(parseOrder).getTotalValue());
+                            }
+                    }
 
-                Intent intent = new Intent(this, ShoppingResultActivity.class);
-                Bundle listBundle = new Bundle();
-                listBundle.putSerializable("ARRAYLIST", (Serializable)UserShoppingArrayList);
-                intent.putExtra("BUNDLE",listBundle);
-                startActivity(intent);
 
+                    Intent intent = new Intent(this, ShoppingResultActivity.class);
+                    Bundle listBundle = new Bundle();
+                    listBundle.putSerializable("ARRAYLIST", (Serializable) UserShoppingArrayList);
+                    intent.putExtra("LISTBUNDLE", listBundle);
+
+                    String USER_NAME = ShoppingUser.getName();
+                    double USER_BUDGET = ShoppingUser.getBankAccount();
+
+                    listBundle.putString("USER_NAME", USER_NAME);
+                    listBundle.putDouble("USER_BUDGET", USER_BUDGET);
+                    startActivity(intent);
+                }
                 break;
 
             default:
