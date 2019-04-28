@@ -62,14 +62,17 @@ public class ShoppingItemEntry<userName> extends AppCompatActivity implements Vi
                         UserShoppingArrayList.add(new ShoppingItem(name, price, priority, quantity));
                         int itemNumber = UserShoppingArrayList.size();
                         UserShoppingArrayList.get(itemNumber - 1).setTotalValue();
-//Fix into 4 different Views so everything is aligned Nicely 4/28
-                        String output = String.format("%-30s", UserShoppingArrayList.get(itemNumber - 1).getName()) +
-                                String.format("%-30s", String.valueOf(UserShoppingArrayList.get(itemNumber - 1).getPrice())) +
-                                String.format("%-30s", String.valueOf(UserShoppingArrayList.get(itemNumber - 1).getQuantity())) +
-                                String.format("%-30s", String.valueOf(UserShoppingArrayList.get(itemNumber - 1).getPriority()));
 
-                        TextView ItemListView = findViewById(R.id.ItemListView);
-                        ItemListView.append(output + "\n");
+                        TextView NameView = findViewById(R.id.NameView);
+                        TextView PriceView = findViewById(R.id.PriceView);
+                        TextView QuantityView = findViewById(R.id.QuantityView);
+                        TextView PriorityView = findViewById(R.id.PriorityView);
+
+
+                        NameView.append(UserShoppingArrayList.get(itemNumber - 1).getName() + "\n");
+                        PriceView.append(UserShoppingArrayList.get(itemNumber - 1).getPrice() + "\n");
+                        QuantityView.append(UserShoppingArrayList.get(itemNumber - 1).getQuantity() + "\n");
+                        PriorityView.append(UserShoppingArrayList.get(itemNumber - 1).getPriority() + "\n");
 
                         nameEntryView.getText().clear();
                         priceEntryView.getText().clear();
@@ -82,11 +85,15 @@ public class ShoppingItemEntry<userName> extends AppCompatActivity implements Vi
             case R.id.ClearList:
                 UserShoppingArrayList.clear();
                 UserShoppingArrayList.trimToSize();
-                TextView ItemListView = findViewById(R.id.ItemListView);
-                ItemListView.setText("");
-//                String ListSizeDebug = new String();
-//                        ListSizeDebug = Integer.toString(UserShoppingArrayList.size());
-//                ItemListView.append(ListSizeDebug);
+
+                TextView NameView = findViewById(R.id.NameView);
+                TextView PriceView = findViewById(R.id.PriceView);
+                TextView QuantityView = findViewById(R.id.QuantityView);
+                TextView PriorityView = findViewById(R.id.PriorityView);
+                NameView.setText("");
+                PriceView.setText("");
+                QuantityView.setText("");
+                PriorityView.setText("");
 
                 break;
 
@@ -94,15 +101,13 @@ public class ShoppingItemEntry<userName> extends AppCompatActivity implements Vi
                 int listLength = UserShoppingArrayList.size();
                 if (listLength > 0) {
                     BubbleSorter.RunSort(listLength, UserShoppingArrayList);
-                    ItemListView = findViewById(R.id.ItemListView);
-                    ItemListView.setText("");
+
                     for (int parseOrder = 0; parseOrder < listLength; parseOrder++) {
                         if (UserShoppingArrayList.get(parseOrder).getTotalValue() <= ShoppingUser.getBankAccount()) {
                             UserShoppingArrayList.get(parseOrder).bought();
                             ShoppingUser.setBankAccount(ShoppingUser.getBankAccount() - UserShoppingArrayList.get(parseOrder).getTotalValue());
                             }
                     }
-
 
                     Intent intent = new Intent(this, ShoppingResultActivity.class);
                     Bundle listBundle = new Bundle();
