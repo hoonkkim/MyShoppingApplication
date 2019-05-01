@@ -12,24 +12,18 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
+
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import org.w3c.dom.Text;
+
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class ShoppingResultActivity extends AppCompatActivity {
@@ -104,56 +98,75 @@ public class ShoppingResultActivity extends AppCompatActivity {
         String filename = new String();
         filename = "NotBought.txt";
 
+        StringBuilder sb = new StringBuilder();
 
-        File localfile = new File(path, filename);
 
-        FileOutputStream localstream = new FileOutputStream(localfile);
-        try {
-            localstream .write("text-to-write".getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            localstream .close();
+        sb.append(String.format("%20s %20s %20s %20s %20s %n"
+                , "Item Name", "Price", "Quantity", "Total Value", "Priority", "Did you buy it?"));
+
+        for (int count = 0; count < shoppingArrayList.size(); count++) {
+            if (!shoppingArrayList.get(count).getBought()) {
+                sb.append(
+                        String.format("%20s %20s %20s %20s %20s %n"
+                                , "|" + shoppingArrayList.get(count).getName() + "|,"
+                                , "|" + shoppingArrayList.get(count).getPrice() + "|,"
+                                , "|" + shoppingArrayList.get(count).getQuantity() + "|,"
+                                , "|" + shoppingArrayList.get(count).getTotalValue() + "|,"
+                                , "|" + shoppingArrayList.get(count).getPriority() + "|,"
+                                , "|" + shoppingArrayList.get(count).getBought() + "|"
+
+                        ));
+            }
         }
 
 
-    // Create a storage reference from our app
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-    // Create a storage reference from our app
-        Uri file = Uri.fromFile(localfile);
-        UploadTask uploadTask;
+                File localfile = new File(path, filename);
 
-        final StorageReference storageRef = storage.getReference();
-        uploadTask = storageRef.putFile(file);
+                FileOutputStream localstream = new FileOutputStream(localfile);
+                try {
+                    localstream.write(sb.toString().getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    localstream.close();
+                }
+
+
+                // Create a storage reference from our app
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+                // Create a storage reference from our app
+                Uri file = Uri.fromFile(localfile);
+                UploadTask uploadTask;
+
+                final StorageReference storageRef = storage.getReference(filename);
+                uploadTask = storageRef.putFile(file);
 
 // Register observers to listen for when the download is done or if it fails
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                TextView PathView = findViewById(R.id.textView19);
-                PathView.setText(exception.getMessage());
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        TextView PathView = findViewById(R.id.textView19);
+                        PathView.setText(exception.getCause().toString());
+
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        String successpath = storageRef.getDownloadUrl().toString();
+                        TextView PathView = findViewById(R.id.textView19);
+                        PathView.setText(successpath);
+
+                    }
+                });
+
+
+                Toast toast = Toast.makeText(context, "Remaining Items saved in " + storageRef.toString() + filename, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 60, 0);
+                toast.show();
+
 
             }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                String successpath = storageRef.getDownloadUrl().toString();
-                TextView PathView = findViewById(R.id.textView19);
-                PathView.setText(successpath);
 
-            }
-        });
-
-
-        Toast toast = Toast.makeText(context, "Remaining Items saved in "+storageRef.toString()+filename, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 60, 0);
-        toast.show();
-
-
-    }
-
-}
-
-
+        }
 
 
