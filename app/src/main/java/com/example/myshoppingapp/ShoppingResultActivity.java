@@ -95,8 +95,7 @@ public class ShoppingResultActivity extends AppCompatActivity {
         ArrayList<ShoppingItem> shoppingArrayList = (ArrayList<ShoppingItem>) listBundle.getSerializable("ARRAYLIST");
 
         File path = context.getFilesDir();
-        String filename = new String();
-        filename = "NotBought.txt";
+        String filename = "NotBought.txt";
 
         StringBuilder sb = new StringBuilder();
 
